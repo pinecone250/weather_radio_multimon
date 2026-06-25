@@ -1,59 +1,55 @@
-# hardware/led.py
-
 import threading
 import time
 
 
 class LEDController:
     def __init__(self, pin=17):
-        # pin kept for Raspberry Pi compatibility later
+
         self.pin = pin
-
         self._running = False
-        self._thread = None
+        self.is_raspberry_pi = self._detect_pi()
 
-        self.state = False  # simulated LED state
+        if self.is_raspberry_pi:
+            from gpiozero import LED
+            self._led = LED(pin)
+            print("[LED] GPIO mode enabled")
+        else:
+            print("[LED] SIMULATION mode")
+
+    def _detect_pi(self):
+        try:
+            with open("/proc/device-tree/model") as f:
+                return "Raspberry Pi" in f.read()
+        except:
+            return False
 
     def start_blink(self, on_time=0.5, off_time=0.5):
-        """Start blinking LED in background thread."""
-
         if self._running:
-            return  # already blinking
+            return
 
         self._running = True
 
         def run():
-            print("[LED] blink started")
-
             while self._running:
-                self._set_state(True)
+
+                if self.is_raspberry_pi:
+                    self._led.on()
+                else:
+                    print("[LED] ON")
+
                 time.sleep(on_time)
 
-                self._set_state(False)
+                if self.is_raspberry_pi:
+                    self._led.off()
+                else:
+                    print("[LED] OFF")
+
                 time.sleep(off_time)
 
-            self._set_state(False)
-            print("[LED] blink stopped")
-
-        self._thread = threading.Thread(target=run, daemon=True)
-        self._thread.start()
+        threading.Thread(target=run, daemon=True).start()
 
     def stop(self):
-        """Stop blinking and turn LED off."""
         self._running = False
 
-    def on(self):
-        self._running = False
-        self._set_state(True)
-
-    def off(self):
-        self._running = False
-        self._set_state(False)
-
-    def _set_state(self, value: bool):
-        self.state = value
-
-        if value:
-            print("[LED] ON")
-        else:
-            print("[LED] OFF")
+        if self.is_raspberry_pi:
+            self._led.off()
