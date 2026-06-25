@@ -16,3 +16,17 @@ led.on()
 time.sleep(1)
 
 led.off()
+
+
+
+from hardware.button import ButtonController
+
+def on_ack():
+    print("[SYSTEM] ALERT ACKNOWLEDGED")
+
+button = ButtonController()
+
+button.on_press(on_ack)
+
+while True:
+    pass
