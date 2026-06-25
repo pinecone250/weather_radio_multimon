@@ -1,45 +1,63 @@
 # hardware/button.py
 
+import sys
 import threading
-import time
 
 
 class ButtonController:
     def __init__(self, pin=27):
-        self.pin = pin  # for future Raspberry Pi use
 
+        self.pin = pin
         self._callback = None
         self._listening = False
 
+        # detect if we're on Raspberry Pi
+        self.is_raspberry_pi = self._detect_pi()
+
+        if self.is_raspberry_pi:
+            self._setup_gpio()
+        else:
+            print("[BUTTON] Running in SIMULATION mode")
+
+    def _detect_pi(self):
+        try:
+            with open("/proc/device-tree/model") as f:
+                return "Raspberry Pi" in f.read()
+        except:
+            return False
+
+    # -------------------------
+    # Raspberry Pi mode
+    # -------------------------
+    def _setup_gpio(self):
+        from gpiozero import Button
+
+        self._button = Button(self.pin)
+        print("[BUTTON] GPIO mode enabled")
+
     def on_press(self, callback):
-        """
-        Register function to call when button is "pressed"
-        """
         self._callback = callback
-        self._listening = True
 
-        print("[BUTTON] Listening for press events (simulated)")
+        if self.is_raspberry_pi:
+            self._button.when_pressed = callback
+        else:
+            self._listening = True
+            thread = threading.Thread(target=self._simulate_input, daemon=True)
+            thread.start()
 
-        # Start background simulation thread
-        thread = threading.Thread(target=self._simulate_input, daemon=True)
-        thread.start()
-
+    # -------------------------
+    # Simulation mode (Windows)
+    # -------------------------
     def _simulate_input(self):
-        """
-        Windows simulation:
-        user types ENTER to simulate button press
-        """
         while self._listening:
-            cmd = input("[BUTTON] Press ENTER to simulate press (or 'q'): ")
+            cmd = input("[BUTTON] Press ENTER (q to quit): ")
 
             if cmd.lower() == "q":
-                print("[BUTTON] Stopped listening")
                 break
 
+            print("[BUTTON] PRESSED")
             if self._callback:
-                print("[BUTTON] PRESSED")
                 self._callback()
 
     def stop(self):
-        """Stop listening for button presses"""
         self._listening = False
