@@ -38,18 +38,16 @@ class SDRReceiver:
             preexec_fn=os.setsid  # lets us kill the whole process group
         )
 
-        # Pipe audio to speaker in background
-        self.audio_thread = threading.Thread(target=self._play_audio, daemon=True)
-        self.audio_thread.start()
+        self.running = true
 
-        self.running = True
 
-    def _play_audio(self):
-        """Send rtl_fm output to speaker"""
-        subprocess.run(
-            ["aplay", "-r", "22050", "-f", "S16_LE"],
-            stdin=self.process.stdout
-        )
+    def read_audio(self, chunk_size=4096):
+        """
+        Returns raw audio bytes from rtl_fm stream
+        """
+        if self.process and self.process.stdout:
+            return self.process.stdout.read(chunk_size)
+        return None
 
     def stop(self):
         """Stop NOAA reception"""
