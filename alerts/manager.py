@@ -30,7 +30,7 @@ class AlertManager:
     # ---------------------------
 
     def start(self):
-        """Boot the weather radio system."""
+        #Boot the weather radio system.
         print("[ALERT MANAGER] Starting system...")
 
         self.running = True
@@ -42,7 +42,7 @@ class AlertManager:
         threading.Thread(target=self._run_loop, daemon=True).start()
 
     def stop(self):
-        """Shutdown system safely."""
+        #Shutdown system safely.
         print("[ALERT MANAGER] Stopping system...")
 
         self.running = False
@@ -64,7 +64,7 @@ class AlertManager:
     # ---------------------------
 
     def trigger_alert(self):
-        """Simulated alert trigger (later from SAME decoder)."""
+        #Simulated alert trigger (later from SAME decoder).
         print("[ALERT] Triggered!")
 
         self.set_state(AlertState.ALERT_ACTIVE)
@@ -73,7 +73,7 @@ class AlertManager:
         self.led.blink()
 
     def acknowledge(self):
-        """User pressed button."""
+        #User pressed button.#
         print("[ALERT] Acknowledged")
 
         self.set_state(AlertState.ACKED)
