@@ -98,23 +98,18 @@ class AlertManager:
             # - audio monitoring
             # - alert parsing
 
-            # ---------------------------------------------------
-            # SIMULATED AUDIO INPUT (placeholder for rtl_fm stream)
-            # ---------------------------------------------------
-            fake_audio_chunk = b"NOAA_AUDIO_DATA"
+            audio_chunk = self.receiver.read_audio()
 
-            # ---------------------------------------------------
-            # PASS TO SAME DECODER
-            # ---------------------------------------------------
-            event = self.decoder.analyze_audio(fake_audio_chunk)
+            event = None
 
-            # ---------------------------------------------------
-            # HANDLE DETECTION
-            # ---------------------------------------------------
+
+            if audio_chunk:
+                event = self.decoder.analyze_audio(audio_chunk)
+
             if event:
-                print(f"[ALERT MANAGER] Event detected: {event}")
+                print(f"[ALERT] {event}")
                 self.trigger_alert()
 
-            time.sleep(1)
+            time.sleep(0.05) #50ms. Can make shorter in the future so won't miss alert. In the future: blocking audio stream → decoder thread → callback on alert
 
         print("[ALERT MANAGER] Loop stopped")
