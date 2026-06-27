@@ -38,7 +38,7 @@ class SDRReceiver:
             preexec_fn=os.setsid  # lets us kill the whole process group
         )
 
-        self.running = true
+        self.running = True
 
 
     def read_audio(self, chunk_size=4096):
