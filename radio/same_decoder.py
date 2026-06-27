@@ -18,10 +18,9 @@ class SAMEDecoder:
         print("[SAME] Decoder initialized")
 
     def analyze_audio(self, audio_chunk):
-        """
-        Placeholder function.
-        Later: real DSP / tone detection.
-        """
+        #Placeholder function.
+        #Later: real DSP / tone detection.
+        
 
         # TEMP SIMULATION RULE
         # (you will replace this later with real signal processing)

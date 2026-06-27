@@ -8,6 +8,7 @@ from radio.receiver import SDRReceiver
 from hardware.speaker import Speaker
 from hardware.led import LEDController
 from hardware.button import ButtonController
+from alerts.same_decoder import SAMEDecoder
 
 
 class AlertManager:
@@ -20,6 +21,8 @@ class AlertManager:
         self.speaker = Speaker()
         self.led = LEDController()
         self.button = ButtonController()
+
+        self.decoder = SAMEDecoder()
 
         self.running = False
 
@@ -94,6 +97,23 @@ class AlertManager:
             # - SAME detection
             # - audio monitoring
             # - alert parsing
+
+            # ---------------------------------------------------
+            # SIMULATED AUDIO INPUT (placeholder for rtl_fm stream)
+            # ---------------------------------------------------
+            fake_audio_chunk = b"NOAA_AUDIO_DATA"
+
+            # ---------------------------------------------------
+            # PASS TO SAME DECODER
+            # ---------------------------------------------------
+            event = self.decoder.analyze_audio(fake_audio_chunk)
+
+            # ---------------------------------------------------
+            # HANDLE DETECTION
+            # ---------------------------------------------------
+            if event:
+                print(f"[ALERT MANAGER] Event detected: {event}")
+                self.trigger_alert()
 
             time.sleep(1)
 
