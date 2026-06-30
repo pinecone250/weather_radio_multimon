@@ -2,7 +2,6 @@ import subprocess
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Start rtl_fm
 cmd = [
     "rtl_fm",
     "-f", "162.550e6",
@@ -17,17 +16,14 @@ process = subprocess.Popen(
     stderr=subprocess.DEVNULL
 )
 
-print("Reading audio...")
+print("Reading SDR audio...")
 
-# Read a chunk
-audio_chunk = process.stdout.read(44100)  # ~2 seconds of audio
+audio_chunk = process.stdout.read(44100)
 
-# Convert to samples
 samples = np.frombuffer(audio_chunk, dtype=np.int16)
 
-# Plot waveform
-plt.plot(samples)
-plt.title("NOAA SDR Audio Waveform")
-plt.xlabel("Sample")
-plt.ylabel("Amplitude")
-plt.show()
+plt.plot(samples[:2000])
+plt.title("NOAA SDR Waveform (SSH Pi)")
+
+plt.savefig("waveform.png")
+print("Saved waveform.png")
