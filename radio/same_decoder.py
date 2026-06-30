@@ -1,65 +1,76 @@
 # alerts/same_decoder.py
 
 import time
+import numpy as np
 
 
 class SAMEEvent:
-    def __init__(self, event_type="UNK", raw=None):
-        self.event_type = event_type  # SVR, FFW, TST, etc.
+    def __init__(self, event_type="UNK", raw=None, strength=None):
+        self.event_type = event_type
         self.raw = raw
+        self.strength = strength
         self.timestamp = time.time()
 
     def __repr__(self):
-        return f"<SAMEEvent {self.event_type}>"
+        return f"<SAMEEvent {self.event_type} strength={self.strength:.4f}>"
 
 
 class SAMEDecoder:
     def __init__(self):
-        print("[SAME] Decoder initialized")
+        print("[SAME] DSP Decoder initialized")
 
-        # simple rolling buffer for future DSP upgrades
-        self.buffer = bytearray()
+        self.buffer = np.array([], dtype=np.int16)
 
     # -----------------------------
     # MAIN ENTRY POINT
     # -----------------------------
     def analyze_audio(self, audio_chunk):
         """
-        Takes raw PCM audio from rtl_fm
-        Returns SAMEEvent or None
+        Convert rtl_fm bytes → numpy samples → DSP analysis
         """
 
         if not audio_chunk:
             return None
 
-        # store recent audio (for future FFT / DSP work)
-        self.buffer.extend(audio_chunk)
+        # --------------------------------------------------
+        # STEP 1: Convert raw PCM bytes → int16 samples
+        # --------------------------------------------------
+        samples = np.frombuffer(audio_chunk, dtype=np.int16)
 
-        # keep buffer bounded (important!)
+        if len(samples) == 0:
+            return None
+
+        # --------------------------------------------------
+        # STEP 2: Compute signal strength (RMS energy)
+        # --------------------------------------------------
+        strength = self._compute_rms(samples)
+
+        # --------------------------------------------------
+        # STEP 3: Store rolling buffer (future FFT use)
+        # --------------------------------------------------
+        self.buffer = np.concatenate((self.buffer, samples))
+
+        # keep buffer bounded
         if len(self.buffer) > 200000:
             self.buffer = self.buffer[-200000:]
 
-        # -----------------------------
-        # PHASE 1: SIMPLE HEURISTIC DETECTION
-        # -----------------------------
-        if self._detect_simple_pattern(audio_chunk):
-            return SAMEEvent(event_type="SVR", raw="simulated detection")
+        # --------------------------------------------------
+        # STEP 4: Simple "activity detection"
+        # --------------------------------------------------
+        if strength > 500:   # threshold (you will tune this)
+            return SAMEEvent(
+                event_type="AUDIO_ACTIVE",
+                raw="rms_trigger",
+                strength=strength
+            )
 
         return None
 
     # -----------------------------
-    # SIMPLE DETECTOR (TEMP)
+    # DSP UTILITY
     # -----------------------------
-    def _detect_simple_pattern(self, chunk):
+    def _compute_rms(self, samples):
         """
-        Temporary logic:
-        NOT real SAME decoding yet.
-
-        This will later become:
-        - FFT analysis
-        - tone detection (1050 Hz / FSK patterns)
+        Root Mean Square (signal power)
         """
-
-        # fake trigger for testing pipeline
-        # replace later with real DSP logic
-        return b"\xAA\xAA" in chunk
+        return np.sqrt(np.mean(samples.astype(np.float32) ** 2))
