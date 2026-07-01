@@ -1,10 +1,8 @@
-# alerts/manager.py
-
 import time
 import threading
+import re
 
 from alerts.states import AlertState
-from radio.receiver import SDRReceiver
 from hardware.speaker import Speaker
 from hardware.led import LEDController
 from hardware.button import ButtonController
@@ -12,16 +10,33 @@ from alerts.same_decoder import SAMEDecoder
 
 
 class AlertManager:
-    def __init__(self):
-        # Core system state
-        self.state = AlertState.IDLE
+    """
+    Production-style NOAA alert controller.
 
-        # Hardware + radio
-        self.receiver = SDRReceiver()
+    Responsibilities:
+    - Receive decoded multimon-ng output
+    - Parse SAME headers
+    - Manage alert state machine
+    - Trigger hardware safely
+    """
+
+    SAME_PATTERN = re.compile(
+    r"ZCZC-(?P<prefix>[A-Z]{3})-(?P<event>[A-Z]{3})-(?P<locations>[A-Z0-9,]+)-(?P<origin>[A-Z0-9]{4})"
+    )
+
+    def __init__(self):
+        self.state = AlertState.IDLE
+        self.last_alert_id = None
+        self.alert_active = False
+        self.lock = threading.Lock()
+        self._pending_timer = None
+
+        # hardware
         self.speaker = Speaker()
         self.led = LEDController()
         self.button = ButtonController()
 
+        # decoder (event-driven)
         self.decoder = SAMEDecoder()
 
         self.running = False
@@ -29,87 +44,149 @@ class AlertManager:
         print("[ALERT MANAGER] Initialized")
 
     # ---------------------------
-    # SYSTEM CONTROL
+    # START / STOP
     # ---------------------------
-
     def start(self):
-        #Boot the weather radio system.
         print("[ALERT MANAGER] Starting system...")
 
         self.running = True
         self.set_state(AlertState.LISTENING)
 
-        self.receiver.start()
+        self.decoder.on_event(self.handle_decoder_event)
+        self.decoder.start()
 
-        # background loop (future: SAME detection, etc.)
         threading.Thread(target=self._run_loop, daemon=True).start()
 
     def stop(self):
-        #Shutdown system safely.
         print("[ALERT MANAGER] Stopping system...")
 
         self.running = False
-        self.receiver.stop()
+        self.decoder.stop()
+
+        self.speaker.stop()
         self.led.off()
 
         self.set_state(AlertState.IDLE)
 
     # ---------------------------
-    # STATE HANDLING
+    # STATE MACHINE
     # ---------------------------
-
     def set_state(self, new_state):
-        print(f"[STATE] {self.state.name} → {new_state.name}")
-        self.state = new_state
+        if self.state != new_state:
+            print(f"[STATE] {self.state.name} → {new_state.name}")
+            self.state = new_state
 
     # ---------------------------
-    # EVENT HANDLERS (SIMPLIFIED)
+    # SAME PARSING
     # ---------------------------
+    def _parse_same(self, text):
+        """
+        Extract structured SAME header info.
+        Returns dict or None.
+        """
+        match = self.SAME_PATTERN.search(text)
+        if not match:
+            return None
 
-    def trigger_alert(self):
-        #Simulated alert trigger (later from SAME decoder).
-        print("[ALERT] Triggered!")
+        return {
+            "prefix": match.group("prefix"),
+            "event": match.group("event"),
+            "locations": match.group("locations").split("-"),
+            "origin": match.group("origin"),
+            "raw": text
+        }
+
+    def _is_valid_same(self, text):
+        return text.startswith("ZCZC")
+
+    def _make_alert_id(self, parsed):
+        """
+        Creates stable deduplication ID.
+        """
+        return f"{parsed['event']}-{parsed['origin']}-{parsed['locations'][0]}"
+
+    # ---------------------------
+    # DECODER CALLBACK
+    # ---------------------------
+    def handle_decoder_event(self, event):
+        text = event.raw
+
+        #fast reject
+        if not self._is_valid_same(text):
+            return
+
+        parsed = self._parse_same(text)
+        if not parsed:
+            return
+
+        # hazard filter (IMPORTANT)
+        if parsed["event"] not in {"TOR", "SVR", "FFW", "EAS", "WXR"}:
+            return
+
+        alert_id = self._make_alert_id(parsed)
+
+        if alert_id == self.last_alert_id:
+            return
+
+        self.last_alert_id = alert_id
+
+        print(f"[DECODED] EVENT={parsed['event']} LOC={parsed['locations']}")
+
+        self.set_state(AlertState.ALERT_DETECTED)
+
+        # cancel previous pending trigger
+        if self._pending_timer:
+            self._pending_timer.cancel()
+
+        self._pending_timer = threading.Timer(
+            0.3,
+            self.trigger_alert,
+            args=[parsed]
+        )
+        self._pending_timer.start()
+
+    # ---------------------------
+    # ALERT EXECUTION
+    # ---------------------------
+    def trigger_alert(self, parsed):
+        with self.lock:
+            if self.alert_active:
+                return
+
+            self.alert_active = True
+
+        print(f"[ALERT] ACTIVE → {parsed['event']} {parsed['locations']}")
 
         self.set_state(AlertState.ALERT_ACTIVE)
 
         self.speaker.play_siren()
         self.led.blink()
 
+    # ---------------------------
+    # USER ACKNOWLEDGE
+    # ---------------------------
     def acknowledge(self):
-        #User pressed button.#
         print("[ALERT] Acknowledged")
+
+        with self.lock:
+            self.alert_active = False
+
 
         self.set_state(AlertState.ACKED)
 
-        self.speaker.stop()   # optional later
+        self.speaker.stop()
         self.led.off()
 
     # ---------------------------
-    # MAIN LOOP
+    # BUTTON LOOP
     # ---------------------------
-
     def _run_loop(self):
-        """Background system loop."""
         print("[ALERT MANAGER] Loop started")
 
         while self.running:
-            # Placeholder for future logic:
-            # - SAME detection
-            # - audio monitoring
-            # - alert parsing
+            if self.button.is_pressed() and self.alert_active:
+                self.acknowledge()
 
-            audio_chunk = self.receiver.read_audio()
-
-            event = None
-
-
-            if audio_chunk:
-                event = self.decoder.analyze_audio(audio_chunk)
-
-            if event:
-                print(f"[ALERT] {event}")
-                self.trigger_alert()
-
-            time.sleep(0.05) #50ms. Can make shorter in the future so won't miss alert. In the future: blocking audio stream → decoder thread → callback on alert
+            time.sleep(0.1)
 
         print("[ALERT MANAGER] Loop stopped")

@@ -1,32 +1,17 @@
-from hardware.led import LEDController
-import time
-
-led = LEDController()
-
-led.start_blink(0.2, 0.2)
-
-time.sleep(3)
-
-led.stop()
-
-time.sleep(1)
-
-led.on()
-
-time.sleep(1)
-
-led.off()
+from alerts.same_decoder import SAMEDecoder
 
 
+def handle_event(event):
+    print("ALERT:", event.raw)
+    # later:
+    # alert_manager.process(event)
+    # led.flash()
+    # speaker.play_siren()
 
-from hardware.button import ButtonController
 
-def on_ack():
-    print("[SYSTEM] ALERT ACKNOWLEDGED")
-
-button = ButtonController()
-
-button.on_press(on_ack)
+decoder = SAMEDecoder()
+decoder.on_event(handle_event)
+decoder.start()
 
 while True:
     pass
