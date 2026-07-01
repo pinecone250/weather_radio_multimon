@@ -5,6 +5,7 @@ import time
 manager = AlertManager()
 manager.start()
 
+"""
 fake = SAMEEvent(
     event_type="SAME_DECODE",
     raw="ZCZC-WXR-TOR-001001-XXXX"
@@ -18,3 +19,4 @@ manager.acknowledge()
 
 time.sleep(2)
 manager.stop()
+"""

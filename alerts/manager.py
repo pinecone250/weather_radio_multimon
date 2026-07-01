@@ -99,8 +99,8 @@ class AlertManager:
             "raw": text
         }
 
-    def _is_valid_same(self, text):
-        return text.startswith("ZCZC")
+    #def _is_valid_same(self, text):
+        #return text.startswith("ZCZC")
 
     def _make_alert_id(self, parsed):
         """
@@ -112,8 +112,14 @@ class AlertManager:
     # DECODER CALLBACK
     # ---------------------------
     def handle_decoder_event(self, event):
+        
+        if event ["type"] != "ALERT_HEADER": #alert header is defined as type in same_decoder
+            return
 
-        parsed = self._parse_same(event.raw)
+
+        raw_text = event["raw"]
+
+        parsed = self._parse_same(raw_text)
         if not parsed:
             return
 
