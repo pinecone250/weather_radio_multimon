@@ -112,16 +112,12 @@ class AlertManager:
     # DECODER CALLBACK
     # ---------------------------
     def handle_decoder_event(self, event):
-        text = event.raw
 
-        #fast reject
-        if not self._is_valid_same(text):
-            return
-
-        parsed = self._parse_same(text)
+        parsed = self._parse_same(event.raw)
         if not parsed:
             return
 
+        """
         # hazard filter (IMPORTANT)
         if parsed["event"] not in {"TOR", "SVR", "FFW", "EAS", "WXR"}:
             return
@@ -147,6 +143,26 @@ class AlertManager:
             args=[parsed]
         )
         self._pending_timer.start()
+        """
+
+    def _handle_alert_logic(self, parsed):
+        if parsed["event"] not in {"TOR", "SVR", "FFW", "EAS", "WXR"}:
+            return
+
+        alert_id = self._make_alert_id(parsed)
+
+        if alert_id == self.last_alert_id:
+            return
+
+        self.last_alert_id = alert_id
+
+        self.set_state(AlertState.ALERT_ACTIVE)
+
+
+
+
+
+
 
     # ---------------------------
     # ALERT EXECUTION
