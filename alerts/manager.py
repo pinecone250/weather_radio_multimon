@@ -6,7 +6,8 @@ from alerts.states import AlertState
 from hardware.speaker import Speaker
 from hardware.led import LEDController
 from hardware.button import ButtonController
-from alerts.same_decoder import SAMEDecoder
+from radio.same_decoder import SAMEDecoder
+from hardware.audio_router import AudioRouter
 
 
 class AlertManager:
@@ -30,6 +31,7 @@ class AlertManager:
         self.alert_active = False
         self.lock = threading.Lock()
         self._pending_timer = None
+        self.audio_router = AudioRouter()
 
         # hardware
         self.speaker = Speaker()
@@ -51,6 +53,7 @@ class AlertManager:
 
         self.running = True
         self.set_state(AlertState.LISTENING)
+        self.button.on_press(self.acknowledge_button)
 
         self.decoder.on_event(self.handle_decoder_event)
         self.decoder.start()
@@ -160,7 +163,8 @@ class AlertManager:
         self.set_state(AlertState.ALERT_ACTIVE)
 
         self.speaker.play_siren()
-        self.led.blink()
+        self.led.start_blink()
+        self.audio_router.to_alert()
 
     # ---------------------------
     # USER ACKNOWLEDGE
@@ -177,6 +181,8 @@ class AlertManager:
         self.speaker.stop()
         self.led.off()
 
+        self.audio_router.to_listening()
+
     # ---------------------------
     # BUTTON LOOP
     # ---------------------------
@@ -184,9 +190,13 @@ class AlertManager:
         print("[ALERT MANAGER] Loop started")
 
         while self.running:
-            if self.button.is_pressed() and self.alert_active:
-                self.acknowledge()
+            
 
             time.sleep(0.1)
 
         print("[ALERT MANAGER] Loop stopped")
+
+
+    def acknowledge_button(self):
+        if self.alert_active:
+            self.acknowledge()
