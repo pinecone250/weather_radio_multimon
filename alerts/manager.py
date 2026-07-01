@@ -58,7 +58,7 @@ class AlertManager:
         self.decoder.on_event(self.handle_decoder_event)
         self.decoder.start()
 
-        threading.Thread(target=self._run_loop, daemon=True).start()
+        #threading.Thread(target=self._run_loop, daemon=True).start()
 
     def stop(self):
         print("[ALERT MANAGER] Stopping system...")
@@ -186,7 +186,7 @@ class AlertManager:
     # ---------------------------
     # BUTTON LOOP
     # ---------------------------
-    def _run_loop(self):
+    """def _run_loop(self):
         print("[ALERT MANAGER] Loop started")
 
         while self.running:
@@ -195,7 +195,7 @@ class AlertManager:
             time.sleep(0.1)
 
         print("[ALERT MANAGER] Loop stopped")
-
+        """
 
     def acknowledge_button(self):
         if self.alert_active:
