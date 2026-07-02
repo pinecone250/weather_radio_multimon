@@ -112,6 +112,8 @@ class AlertManager:
     # DECODER CALLBACK
     # ---------------------------
     def handle_decoder_event(self, event):
+
+        print("EVENT RECEIVED:", event)
         
         if event ["type"] != "ALERT_HEADER": #alert header is defined as type in same_decoder
             return
