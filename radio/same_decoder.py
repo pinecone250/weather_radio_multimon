@@ -28,7 +28,7 @@ class SAMEDecoder:
         """
 
         cmd = (
-            "ffmpeg -i Flash_flood_warning_Tennessee.ogg "
+            "ffmpeg -i /home/project/Flash_flood_warning_Tennessee.ogg "
             "-f s16le -ar 22050 -ac 1 - | "
             "multimon-ng -t raw -a EAS -"
         )
