@@ -155,6 +155,19 @@ class AlertManager:
         self._pending_timer.start()
         """
 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    """
     def _handle_alert_logic(self, parsed):
         if parsed["event"] not in {"TOR", "SVR", "FFW", "EAS", "WXR"}:
             return
@@ -167,6 +180,7 @@ class AlertManager:
         self.last_alert_id = alert_id
 
         self.set_state(AlertState.ALERT_ACTIVE)
+    """
 
 
 
