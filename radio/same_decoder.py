@@ -10,7 +10,7 @@ class SAMEDecoder:
         self.process = None
 
 
-    def on_event(self):
+    def on_event(self, callback):
         self.callback = callback
 
 
@@ -28,7 +28,7 @@ class SAMEDecoder:
         """
 
         cmd = (
-            "ffmpeg -i Flash_flood_warning_Tennessee.ogg"
+            "ffmpeg -i Flash_flood_warning_Tennessee.ogg "
             "-f s16le -ar 22050 -ac 1 - | "
             "multimon-ng -t raw -a EAS -"
         )
