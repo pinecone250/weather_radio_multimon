@@ -9,6 +9,7 @@ import threading
 class Speaker:
     def __init__(self):
         self.system = platform.system()
+        self.process = None
 
         self.siren_file = "sounds/siren.wav"  # you can switch to mp3 later
 
@@ -24,15 +25,12 @@ class Speaker:
             print(f"[SPEAKER] File not found: {file_path}")
             return
 
-        # Windows fallback (simulation)
-        if self.system == "Windows":
-            print(f"[SPEAKER] (SIM) Playing: {file_path}")
-            return
-
         # Raspberry Pi / Linux playback
         try:
             # Preferred lightweight CLI player
-            subprocess.run(["aplay", file_path], check=False)
+            self.process = subprocess.Popen(["aplay", file_path])
+            self.process.wait()
+            self.process = None
 
         except FileNotFoundError:
             print("[SPEAKER] aplay not found. Install ALSA utils:")
@@ -40,3 +38,11 @@ class Speaker:
 
     def play_startup(self):
         print("[SPEAKER] Startup sound (not implemented yet)")
+
+
+
+    def stop(self):
+        if self.process and self.process.poll() is None:
+            self.process.terminate()
+            self.process.wait()
+            self.process = None
