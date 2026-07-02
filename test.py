@@ -1,17 +1,18 @@
-from alerts.manager import AlertManager
-#from radio.same_decoder import SAMEEvent
 import time
+from alerts.manager import AlertManager
 
 manager = AlertManager()
 
-import time
-
-manager.start()
-
 try:
+    manager.start()
+
     while True:
         time.sleep(1)
+
 except KeyboardInterrupt:
+    print("Stopping...")
+
+finally:
     manager.stop()
 """
 fake = SAMEEvent(
