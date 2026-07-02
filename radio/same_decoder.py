@@ -45,6 +45,9 @@ class SAMEDecoder:
     def _reader(self):
         for line in self.process.stdout:
             line = line.strip()
+
+            print("[RAW]", line)
+
             event = self._parse(line)
 
             if event and self.callback:
