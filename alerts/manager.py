@@ -125,6 +125,8 @@ class AlertManager:
         if not parsed:
             return
 
+        self.set_state(AlertState.ALERT_ACTIVE)
+
         """
         # hazard filter (IMPORTANT)
         if parsed["event"] not in {"TOR", "SVR", "FFW", "EAS", "WXR"}:
