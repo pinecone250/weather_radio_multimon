@@ -125,7 +125,7 @@ class AlertManager:
         if not parsed:
             return
 
-        self.set_state(AlertState.ALERT_ACTIVE)
+        self.trigger_alert(parsed)
 
         """
         # hazard filter (IMPORTANT)
