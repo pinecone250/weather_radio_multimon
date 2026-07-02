@@ -51,6 +51,7 @@ class SAMEDecoder:
             event = self._parse(line)
 
             if event and self.callback:
+                print("[CALLBACK FIRED]")
                 self.callback(event)
 
     def _parse(self, line: str):
