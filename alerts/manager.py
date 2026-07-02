@@ -22,7 +22,14 @@ class AlertManager:
     """
 
     SAME_PATTERN = re.compile(
-    r"ZCZC-(?P<prefix>[A-Z]{3})-(?P<event>[A-Z]{3})-(?P<locations>[A-Z0-9,]+)-(?P<origin>[A-Z0-9]{4})"
+        r"ZCZC-"
+        r"(?P<originator>[A-Z]{3})-"
+        r"(?P<event>[A-Z]{3})-"
+        r"(?P<locations>\d{6}(?:-\d{6})*)"
+        r"\+"
+        r"(?P<purge>\d{4})-"
+        r"(?P<issued>\d{7})-"
+        r"(?P<sender>[A-Z0-9/]+)-"
     )
 
     def __init__(self):
@@ -92,10 +99,12 @@ class AlertManager:
             return None
 
         return {
-            "prefix": match.group("prefix"),
+            "originator": match.group("originator"),
             "event": match.group("event"),
             "locations": match.group("locations").split("-"),
-            "origin": match.group("origin"),
+            "purge": match.group("purge"),
+            "issued": match.group("issued"),
+            "sender": match.group("sender"),
             "raw": text
         }
 
