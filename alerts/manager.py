@@ -127,6 +127,8 @@ class AlertManager:
 
         self.trigger_alert(parsed)
 
+        print ("reached end")
+
         """
         # hazard filter (IMPORTANT)
         if parsed["event"] not in {"TOR", "SVR", "FFW", "EAS", "WXR"}:
