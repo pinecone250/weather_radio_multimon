@@ -123,11 +123,13 @@ class AlertManager:
 
         parsed = self._parse_same(raw_text)
         if not parsed:
+            print("Parse failed")
             return
 
+        print("Calling trigger_alert")
         self.trigger_alert(parsed)
 
-        print ("reached end")
+        print("reached end")
 
         """
         # hazard filter (IMPORTANT)
