@@ -36,12 +36,3 @@ while True:
 
     speaker.write(data)
     decoder.write_audio(data)
-
-
-    # trigger alert at some point for testing
-    if p.poll() is None:
-        manager.trigger_alert({
-            "type": "TEST_ALERT",
-            "raw": "simulated event"
-        })
-        break
