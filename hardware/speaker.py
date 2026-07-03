@@ -62,7 +62,7 @@ class Speaker:
         self.system = platform.system()
         self.stream_process = None
         self.siren_process = None
-        self.muted = True
+        self.muted = False
 
         self.siren_file = "sounds/siren.wav"
 
@@ -75,6 +75,8 @@ class Speaker:
         """
         Called by SDRReceiver fanout via stdin pipe
         """
+
+        print("[SPEAKER] Stream started")
         if self.stream_process:
             return
 

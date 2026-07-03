@@ -217,6 +217,8 @@ class AlertManager:
         
         self.led.start_blink()
 
+        self.speaker.mute_stream()
+
         self.speaker.play_siren()
 
         #RECOVERY FLOW
