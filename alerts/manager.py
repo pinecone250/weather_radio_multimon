@@ -232,7 +232,7 @@ class AlertManager:
         self.set_state(AlertState.ACKED)
 
         self.speaker.stop()
-        self.led.off()
+        self.led.stop()
 
         self.audio_router.to_listening()
 
