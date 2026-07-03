@@ -18,11 +18,20 @@
 
 
 class AudioRouter:
+    LISTENING = "LISTENING"
+    ALERT = "ALERT"
+
     def __init__(self):
-        self.mode = "LISTENING"
+        self.mode = self.LISTENING
 
     def to_alert(self):
-        self.mode = "ALERT"
+        self.mode = self.ALERT
 
     def to_listening(self):
-        self.mode = "LISTENING"
+        self.mode = self.LISTENING
+
+    def is_alert(self):
+        return self.mode == self.ALERT
+
+    def is_listening(self):
+        return self.mode == self.LISTENING

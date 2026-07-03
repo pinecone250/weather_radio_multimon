@@ -4,10 +4,11 @@ import threading
 
 
 class SAMEDecoder:
-    def __init__(self, frequency="162.550M"):
+    def __init__(self, frequency="162.550M", callback=None):
         self.frequency = frequency
-        self.callback = None
+        self.callback = callback
         self.process = None
+        
 
 
     def on_event(self, callback):
