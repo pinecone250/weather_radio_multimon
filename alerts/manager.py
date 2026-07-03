@@ -7,7 +7,6 @@ from hardware.speaker import Speaker
 from hardware.led import LEDController
 from hardware.button import ButtonController
 from radio.same_decoder import SAMEDecoder
-from hardware.audio_router import AudioRouter
 
 
 class AlertManager:
@@ -215,9 +214,33 @@ class AlertManager:
 
         self.set_state(AlertState.ALERT_ACTIVE)
 
-        self.speaker.play_siren()
+        
         self.led.start_blink()
-        self.audio_router.to_alert()
+
+        self.speaker.play_siren()
+
+        #RECOVERY FLOW
+        threading.Thread(target=self._recover, daemon=True).start()
+
+
+    def _recover(self):
+        # Wait for siren duration (adjust later if dynamic)
+        time.sleep(5)
+
+        print("[ALERT] Returning to normal")
+
+        # stop LED
+        self.led.stop_blink()
+
+        # resume audio
+        self.speaker.unmute_stream()
+
+        # reset state
+        self.set_state("LISTENING")
+
+        with self.lock:
+            self.alert_active = False
+        
 
     # ---------------------------
     # USER ACKNOWLEDGE
@@ -234,7 +257,7 @@ class AlertManager:
         self.speaker.stop()
         self.led.stop()
 
-        self.audio_router.to_listening()
+        
 
     # ---------------------------
     # BUTTON LOOP

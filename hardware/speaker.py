@@ -88,7 +88,7 @@ class Speaker:
         """
         Continuous audio from SDRReceiver
         """
-        if not self.stream_process:
+        if self.muted or not self.stream_process:
             return
 
         try:
@@ -103,13 +103,13 @@ class Speaker:
     def play_siren(self):
         threading.Thread(target=self._play_file, args=(self.siren_file,), daemon=True).start()
 
-    def _play_file(self, file_path):
-        if not os.path.exists(file_path):
-            print(f"[SPEAKER] Missing file: {file_path}")
+    def _play_file(self):
+        if not os.path.exists(self.siren_file):
+            print(f"[SPEAKER] Missing file: {self.siren_file}")
             return
 
         try:
-            self.siren_process = subprocess.Popen(["aplay", file_path])
+            self.siren_process = subprocess.Popen(["aplay", self.siren_file])
             self.siren_process.wait()
             self.siren_process = None
         except Exception as e:
@@ -122,6 +122,10 @@ class Speaker:
 
     def stop(self):
         self.stop_stream()
+
+        if self.siren_process and self.siren_process.poll() is None:
+            self.siren_process.terminate()
+            self.siren_process = None
 
         if self.siren_process and self.siren_process.poll() is None:
             self.siren_process.terminate()
