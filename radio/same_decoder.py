@@ -4,8 +4,8 @@ import threading
 
 
 class SAMEDecoder:
-    def __init__(self, frequency="162.550M", callback=None):
-        self.frequency = frequency
+    def __init__(self, callback=None):
+        #self.frequency = frequency
         self.callback = callback
         self.process = None
         
@@ -28,11 +28,30 @@ class SAMEDecoder:
         )
         """
 
+        #In the future, this command should be run:
+        #cmd = ["multimon-ng", "-t", "raw", "-a", "EAS", "-"]
+
+        
+        #Start multimon-ng ONLY (no rtl_fm here)
+        
+
+        self.process = subprocess.Popen(
+            ["multimon-ng", "-t", "raw", "-a", "EAS", "-"],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1
+        )
+
+        """ For testing 
+
         cmd = (
             "ffmpeg -i /home/project/Flash_flood_warning_Tennessee.ogg "
             "-f s16le -ar 22050 -ac 1 - | "
             "multimon-ng -t raw -a EAS -"
         )
+
         self.process = subprocess.Popen(
             ["bash", "-c", cmd],
             stdout=subprocess.PIPE,
@@ -41,7 +60,25 @@ class SAMEDecoder:
             bufsize=1
         )
 
+        """
+
         threading.Thread(target=self._reader, daemon=True).start()
+
+
+    def write_audio(self, data: bytes):
+        """
+        Called by SDRReceiver fanout
+        """
+        if not self.process:
+            return
+
+        try:
+            self.process.stdin.write(data)
+            self.process.stdin.flush()
+        except Exception:
+            pass
+
+    
 
     def _reader(self):
         for line in self.process.stdout:

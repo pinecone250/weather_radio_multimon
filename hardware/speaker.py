@@ -1,5 +1,7 @@
 # hardware/speaker.py
 
+
+"""
 import os
 import platform
 import subprocess
@@ -16,7 +18,7 @@ class Speaker:
         print(f"[SPEAKER] Initialized on {self.system}")
 
     def play_siren(self):
-        """Play siren sound (non-blocking)."""
+        #Play siren sound (non-blocking).
         thread = threading.Thread(target=self._play, args=(self.siren_file,), daemon=True)
         thread.start()
 
@@ -46,3 +48,81 @@ class Speaker:
             self.process.terminate()
             self.process.wait()
             self.process = None
+
+"""
+
+import os
+import platform
+import subprocess
+import threading
+
+
+class Speaker:
+    def __init__(self):
+        self.system = platform.system()
+        self.stream_process = None
+        self.siren_process = None
+
+        self.siren_file = "sounds/siren.wav"
+
+        print(f"[SPEAKER] Initialized on {self.system}")
+
+    # ---------------------------
+    # LIVE AUDIO STREAM (rtl_fm)
+    # ---------------------------
+    def start_stream(self):
+        """
+        Called by SDRReceiver fanout via stdin pipe
+        """
+        if self.stream_process:
+            return
+
+        self.stream_process = subprocess.Popen(
+            ["aplay", "-r", "22050", "-f", "S16_LE"],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+
+    def write(self, data: bytes):
+        """
+        Continuous audio from SDRReceiver
+        """
+        if not self.stream_process:
+            return
+
+        try:
+            self.stream_process.stdin.write(data)
+            self.stream_process.stdin.flush()
+        except Exception:
+            pass
+
+    # ---------------------------
+    # ALERT SOUNDS (siren etc.)
+    # ---------------------------
+    def play_siren(self):
+        threading.Thread(target=self._play_file, args=(self.siren_file,), daemon=True).start()
+
+    def _play_file(self, file_path):
+        if not os.path.exists(file_path):
+            print(f"[SPEAKER] Missing file: {file_path}")
+            return
+
+        try:
+            self.siren_process = subprocess.Popen(["aplay", file_path])
+            self.siren_process.wait()
+            self.siren_process = None
+        except Exception as e:
+            print(f"[SPEAKER] Error playing siren: {e}")
+
+    def stop_stream(self):
+        if self.stream_process:
+            self.stream_process.terminate()
+            self.stream_process = None
+
+    def stop(self):
+        self.stop_stream()
+
+        if self.siren_process and self.siren_process.poll() is None:
+            self.siren_process.terminate()
+            self.siren_process = None

@@ -67,84 +67,76 @@ class SDRReceiver:
 """
 
 import subprocess
+import threading
 import os
 import signal
 
 
 class SDRReceiver:
-    def __init__(self, frequency=162.550e6):
+    def __init__(self, frequency=162.550e6, decoder=None, speaker=None):
         self.frequency = frequency
+        self.decoder = decoder      # SAMEDecoder instance
+        self.speaker = speaker      # Speaker controller (optional wrapper)
         self.rtl_process = None
-        self.aplay_process = None
         self.running = False
-        self.muted = False
+
+        print(f"[SDR] Initialized at {self.frequency/1e6:.3f} MHz")
 
     def start(self):
         if self.running:
             return
 
-        print("[SDR] Starting rtl_fm pipeline...")
+        print("[SDR] Starting rtl_fm...")
 
-        rtl_cmd = [
-            "rtl_fm",
-            "-f", str(self.frequency),
-            "-M", "fm",
-            "-s", "22050",
-            "-r", "22050"
-        ]
-
-        # Start rtl_fm
         self.rtl_process = subprocess.Popen(
-            rtl_cmd,
+            [
+                "rtl_fm",
+                "-f", str(self.frequency),
+                "-M", "fm",
+                "-s", "22050",
+                "-r", "22050"
+            ],
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
             preexec_fn=os.setsid
         )
 
-        # Audio output via aplay
-        self.aplay_process = subprocess.Popen(
-            ["aplay", "-r", "22050", "-f", "S16_LE"],
-            stdin=self.rtl_process.stdout,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL
-        )
-
         self.running = True
 
-    def mute(self):
-        """Instant silence without stopping rtl_fm"""
-        if self.aplay_process:
-            self.aplay_process.terminate()
-            self.aplay_process = None
+        threading.Thread(target=self._fanout, daemon=True).start()
 
-        self.muted = True
+    def _fanout(self):
+        """
+        Single audio source → duplicated to:
+        - Speaker (aplay)
+        - SAMEDecoder (multimon-ng)
+        """
+        while self.running:
+            data = self.rtl_process.stdout.read(1024)
+            if not data:
+                continue
 
-    def unmute(self):
-        """Restore audio instantly"""
-        if not self.running or not self.muted:
-            return
+            # ---- send to speaker ----
+            if self.speaker:
+                try:
+                    self.speaker.write(data)
+                except Exception:
+                    pass
 
-        print("[SDR] Unmuting audio...")
-
-        self.aplay_process = subprocess.Popen(
-            ["aplay", "-r", "22050", "-f", "S16_LE"],
-            stdin=self.rtl_process.stdout,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL
-        )
-
-        self.muted = False
+            # ---- send to SAME decoder ----
+            if self.decoder:
+                try:
+                    self.decoder.write_audio(data)
+                except Exception:
+                    pass
 
     def stop(self):
         print("[SDR] Stopping...")
 
-        try:
-            if self.aplay_process:
-                self.aplay_process.terminate()
+        self.running = False
 
+        try:
             if self.rtl_process:
                 os.killpg(os.getpgid(self.rtl_process.pid), signal.SIGTERM)
-
-        finally:
-            self.running = False
-            self.muted = False
+        except Exception as e:
+            print(f"[SDR] Stop error: {e}")
