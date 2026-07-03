@@ -37,7 +37,7 @@ class AlertManager:
         self.alert_active = False
         self.lock = threading.Lock()
         self._pending_timer = None
-        self.audio_router = AudioRouter()
+        #self.audio_router = AudioRouter()
 
         # hardware
         self.speaker = Speaker()
