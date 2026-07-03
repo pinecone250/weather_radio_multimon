@@ -11,7 +11,7 @@ speaker.start_stream()
 decoder = SAMEDecoder(callback=print)
 decoder.start()
 
-manager = AlertManager(speaker=speaker, led=None)  # LED optional for test
+manager = AlertManager()  # LED optional for test
 
 
 # start audio pipeline from .ogg
