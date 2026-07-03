@@ -4,21 +4,29 @@ import os
 import platform
 import subprocess
 import threading
+import signal
 
 
 class Speaker:
-    def __init__(self):
+    def __init__(self, frequency="162.550M"):
         self.system = platform.system()
-        self.process = None
+        self.siren_process = None
+        self.stream_process = None
+        self.frequency = frequency
 
         self.siren_file = "sounds/siren.wav"  # you can switch to mp3 later
 
         print(f"[SPEAKER] Initialized on {self.system}")
 
+    """
     def play_siren(self):
-        """Play siren sound (non-blocking)."""
+        #Play siren sound (non-blocking).
         thread = threading.Thread(target=self._play, args=(self.siren_file,), daemon=True)
         thread.start()
+    """
+
+    def play_siren(self):
+        self._play(self.siren_file)
 
     def _play(self, file_path):
         if not os.path.exists(file_path):
@@ -28,21 +36,59 @@ class Speaker:
         # Raspberry Pi / Linux playback
         try:
             # Preferred lightweight CLI player
-            self.process = subprocess.Popen(["aplay", file_path])
-            self.process.wait()
-            self.process = None
+            self.siren_process = subprocess.Popen(["aplay", file_path])
+            self.siren_process.wait()
+            self.siren_process = None
 
         except FileNotFoundError:
             print("[SPEAKER] aplay not found. Install ALSA utils:")
             print("sudo apt install alsa-utils")
 
-    def play_startup(self):
-        print("[SPEAKER] Startup sound (not implemented yet)")
 
+    def start_stream(self):
+        #Starts a new rtl_fm -> aplay pipeline.
+        #Safe to call multiple times.
+        
+        if self.stream_process is not None:
+            return
+
+        cmd = (
+            f"rtl_fm -f {self.frequency} -M fm -s 22050 -r 22050 -E deemp - "
+            f"| aplay -r 22050 -f S16_LE"
+        )
+
+        self.stream_process = subprocess.Popen(
+            ["bash", "-c", cmd],
+            preexec_fn=os.setsid,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+
+        print("[SPEAKER] Broadcast stream started")
+
+
+    def stop_stream(self):
+        """
+        Stops the rtl_fm -> aplay pipeline.
+        """
+        if self.stream_process is None:
+            return
+
+        try:
+            os.killpg(os.getpgid(self.stream_process.pid), signal.SIGTERM)
+            self.stream_process.wait(timeout=2)
+        except Exception as e:
+            print(f"[SPEAKER] Error stopping stream: {e}")
+
+        self.stream_process = None
+
+        print("[SPEAKER] Broadcast stream stopped")
 
 
     def stop(self):
-        if self.process and self.process.poll() is None:
-            self.process.terminate()
-            self.process.wait()
-            self.process = None
+        self.stop_stream()
+
+        if self.siren_process and self.siren_process.poll() is None:
+            self.siren_process.terminate()
+            self.siren_process.wait()
+            self.siren_process = None

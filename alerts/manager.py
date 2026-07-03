@@ -216,8 +216,8 @@ class AlertManager:
         self.set_state(AlertState.ALERT_ACTIVE)
 
         self.speaker.play_siren()
+        self.speaker.start_stream()
         self.led.start_blink()
-        self.audio_router.to_alert()
 
     # ---------------------------
     # USER ACKNOWLEDGE
@@ -233,8 +233,6 @@ class AlertManager:
 
         self.speaker.stop()
         self.led.stop()
-
-        self.audio_router.to_listening()
 
     # ---------------------------
     # BUTTON LOOP
