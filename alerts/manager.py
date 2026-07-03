@@ -233,7 +233,7 @@ class AlertManager:
         self.led.stop_blink()
 
         # resume audio
-        self.speaker.unmute_stream()
+        self.speaker.mute_stream()
 
         # reset state
         self.set_state("LISTENING")

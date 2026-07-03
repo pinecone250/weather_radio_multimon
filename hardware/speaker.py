@@ -62,7 +62,7 @@ class Speaker:
         self.system = platform.system()
         self.stream_process = None
         self.siren_process = None
-        self.muted = False
+        self.muted = True
 
         self.siren_file = "sounds/siren.wav"
 
@@ -131,3 +131,13 @@ class Speaker:
         if self.siren_process and self.siren_process.poll() is None:
             self.siren_process.terminate()
             self.siren_process = None
+
+
+
+    def mute_stream(self):
+        self.muted = True
+        print("[SPEAKER] Stream muted")
+
+    def unmute_stream(self):
+        self.muted = False
+        print("[SPEAKER] Stream unmuted")
