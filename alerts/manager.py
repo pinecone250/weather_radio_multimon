@@ -232,9 +232,6 @@ class AlertManager:
 
         print("[ALERT] Returning to normal")
 
-        # stop LED
-        self.led.stop_blink()
-
         # resume audio
         self.speaker.mute_stream()
 
