@@ -62,7 +62,7 @@ class Speaker:
         self.system = platform.system()
         self.stream_process = None
         self.siren_process = None
-        self.muted = false
+        self.muted = False
 
         self.siren_file = "sounds/siren.wav"
 
