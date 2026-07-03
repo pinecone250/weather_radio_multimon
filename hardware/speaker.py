@@ -140,6 +140,12 @@ class Speaker:
         self.muted = True
         print("[SPEAKER] Stream muted")
 
+        if self.stream_process:
+            try:
+                self.stream_process.stdin.close()
+            except:
+                pass
+
     def unmute_stream(self):
         self.muted = False
         print("[SPEAKER] Stream unmuted")

@@ -218,6 +218,7 @@ class AlertManager:
         self.led.start_blink()
 
         self.speaker.mute_stream()
+        time.sleep(0.1)
 
         self.speaker.play_siren()
 
