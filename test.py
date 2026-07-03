@@ -1,7 +1,7 @@
 import subprocess
 import time
 from hardware.speaker import Speaker
-from radio.samedecoder import SAMEDecoder
+from radio.same_decoder import SAMEDecoder
 from alerts.manager import AlertManager
 
 
