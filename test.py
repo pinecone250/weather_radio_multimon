@@ -1,31 +1,47 @@
+import subprocess
 import time
+from hardware.speaker import Speaker
+from radio.samedecoder import SAMEDecoder
 from alerts.manager import AlertManager
 
-manager = AlertManager()
 
-try:
-    manager.start()
+speaker = Speaker()
+speaker.start_stream()
 
-    while True:
-        time.sleep(1)
+decoder = SAMEDecoder(callback=print)
+decoder.start()
 
-except KeyboardInterrupt:
-    print("Stopping...")
+manager = AlertManager(speaker=speaker, led=None)  # LED optional for test
 
-finally:
-    manager.stop()
-"""
-fake = SAMEEvent(
-    event_type="SAME_DECODE",
-    raw="ZCZC-WXR-TOR-001001-XXXX"
-)
 
-manager.handle_decoder_event(fake)
+# start audio pipeline from .ogg
+cmd = [
+    "ffmpeg",
+    "-i", "/home/project/Flash_flood_warning_Tennessee.ogg",
+    "-f", "s16le",
+    "-ar", "22050",
+    "-ac", "1",
+    "-"
+]
 
-time.sleep(5)
+p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
 
-manager.acknowledge()
+print("[TEST] Playing .ogg into system...")
 
-time.sleep(2)
-manager.stop()
-"""
+# simulate live stream fanout
+while True:
+    data = p.stdout.read(1024)
+    if not data:
+        break
+
+    speaker.write(data)
+    decoder.write_audio(data)
+
+
+    # trigger alert at some point for testing
+    if p.poll() is None:
+        manager.trigger_alert({
+            "type": "TEST_ALERT",
+            "raw": "simulated event"
+        })
+        break
