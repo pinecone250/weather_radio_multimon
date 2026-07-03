@@ -74,7 +74,7 @@ class AlertManager:
         self.decoder.stop()
 
         self.speaker.stop()
-        self.led.off()
+        self.led.stop()
 
         self.set_state(AlertState.IDLE)
 
