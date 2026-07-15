@@ -52,10 +52,17 @@ class Speaker:
         if self.stream_process is not None:
             return
 
+
+        #cmd = (
+        #    f"rtl_fm -f {self.frequency} -M fm -s 22050 -r 22050 -E deemp - "
+        #    f"| aplay -r 22050 -f S16_LE"
+        #)
+
         cmd = (
             f"rtl_fm -f {self.frequency} -M fm -s 22050 -r 22050 -E deemp - "
-            f"| aplay -r 22050 -f S16_LE"
+            f"| aplay -D plug:default -r 22050 -f S16_LE"
         )
+
 
         self.stream_process = subprocess.Popen(
             ["bash", "-c", cmd],
