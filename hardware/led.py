@@ -34,9 +34,9 @@ class LEDController:
 
                 if self.is_raspberry_pi:
                     self._led.on()
-                    print("[LED] ON")
+                    #print("[LED] ON")
                 #else:
-                    print("[LED] ON")
+                    #print("[LED] ON")
 
                 time.sleep(on_time)
 
