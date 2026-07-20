@@ -3,7 +3,7 @@ import time
 
 
 class LEDController:
-    def __init__(self, pin=17):
+    def __init__(self, pin=27):
 
         self.pin = pin
         self._running = False
