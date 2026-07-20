@@ -6,7 +6,7 @@ from gpiozero import Button
 
 
 class ButtonController:
-    def __init__(self, pin=27):
+    def __init__(self, pin=17):
         self.button = Button(pin)
     
     def on_press(self, callback):
