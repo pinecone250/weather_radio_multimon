@@ -34,7 +34,7 @@ class LEDController:
 
                 if self.is_raspberry_pi:
                     self._led.on()
-                    #print("[LED] ON")
+                    print("[LED] ON")
                 #else:
                     #print("[LED] ON")
 
@@ -42,7 +42,7 @@ class LEDController:
 
                 if self.is_raspberry_pi:
                     self._led.off()
-                    #print("[LED] OFF")
+                    print("[LED] OFF")
                 #else:
                     #print("[LED] OFF")
 

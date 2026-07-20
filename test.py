@@ -14,6 +14,7 @@ except KeyboardInterrupt:
 
 finally:
     manager.stop()
+    
 """
 fake = SAMEEvent(
     event_type="SAME_DECODE",
