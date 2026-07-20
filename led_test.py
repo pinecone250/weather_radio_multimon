@@ -1,3 +1,4 @@
+"""
 from gpiozero import LED
 from time import sleep
 
@@ -8,3 +9,4 @@ while True:
     sleep(1)
     led.off()
     sleep(1)
+"""
