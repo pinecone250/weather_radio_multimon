@@ -107,9 +107,6 @@ class AlertManager:
             "raw": text
         }
 
-    #def _is_valid_same(self, text):
-        #return text.startswith("ZCZC")
-
     def _make_alert_id(self, parsed):
         """
         Creates stable deduplication ID.
@@ -236,16 +233,6 @@ class AlertManager:
     # ---------------------------
     # BUTTON LOOP
     # ---------------------------
-    """def _run_loop(self):
-        print("[ALERT MANAGER] Loop started")
-
-        while self.running:
-            
-
-            time.sleep(0.1)
-
-        print("[ALERT MANAGER] Loop stopped")
-        """
 
     def acknowledge_button(self):
         if self.alert_active:
