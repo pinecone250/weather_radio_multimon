@@ -11,15 +11,7 @@ from radio.same_decoder import SAMEDecoder
 
 
 class AlertManager:
-    """
-    Production-style NOAA alert controller.
-
-    Responsibilities:
-    - Receive decoded multimon-ng output
-    - Parse SAME headers
-    - Manage alert state machine
-    - Trigger hardware safely
-    """
+    
 
     SAME_PATTERN = re.compile(
         r"ZCZC-"
