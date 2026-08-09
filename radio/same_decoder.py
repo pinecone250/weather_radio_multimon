@@ -58,10 +58,9 @@ class SAMEDecoder:
                 self.callback(event)
 
     def _parse(self, line: str):
-        """
-        ONLY converts decoder output → structured events.
-        No decision making here.
-        """
+        
+        #reads terminal output for valid SAME code
+        
 
         if not line:
             return None
