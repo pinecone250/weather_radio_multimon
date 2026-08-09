@@ -9,4 +9,3 @@ class AlertState(Enum):
     ALERT_DETECTED = auto() # SAME header detected
     ALERT_ACTIVE = auto()  # siren + LED active
     ACKED = auto()         # user acknowledged alert
-    SILENCED = auto()      # temporarily muted
