@@ -15,8 +15,6 @@ class SAMEDecoder:
 
 
     def start(self):
-        # Stable NOAA pipeline:
-        # rtl_fm → sox (format lock) → multimon-ng
         
         #Comment out cmd for testing! Remove Later!
 
