@@ -1,17 +1,18 @@
-from alerts.same_decoder import SAMEDecoder
+import time
+from alerts.manager import AlertManager
 
+manager = AlertManager()
 
-def handle_event(event):
-    print("ALERT:", event.raw)
-    # later:
-    # alert_manager.process(event)
-    # led.flash()
-    # speaker.play_siren()
+try:
+    #start manager
+    manager.start(Testing=False)
 
+    while True:
+        time.sleep(1)
 
-decoder = SAMEDecoder()
-decoder.on_event(handle_event)
-decoder.start()
+except KeyboardInterrupt:
+    print("Stopping...")
 
-while True:
-    pass
+finally:
+    manager.stop()
+    
