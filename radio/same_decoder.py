@@ -14,25 +14,25 @@ class SAMEDecoder:
         self.callback = callback
 
 
-    def start(self):
+    def start(self, testing: False):
         
         #Comment out cmd for testing! Remove Later!
 
-        """
-        cmd = (
-            f"rtl_fm -f {self.frequency} -M fm -s 24000 -r 24000 -E deemp - "
-            f"| sox -t raw -r 24000 -e signed -b 16 -c 1 - "
-            f"-t raw -r 22050 -e signed -b 16 -c 1 - "
-            f"| multimon-ng -t raw -a EAS -"
-        )
-        """
+        if testing == False:
+            cmd = (
+                f"rtl_fm -f {self.frequency} -M fm -s 24000 -r 24000 -E deemp - "
+                f"| sox -t raw -r 24000 -e signed -b 16 -c 1 - "
+                f"-t raw -r 22050 -e signed -b 16 -c 1 - "
+                f"| multimon-ng -t raw -a EAS -"
+            )
         
         
-        cmd = (
-            "ffmpeg -i /home/project/Flash_flood_warning_Tennessee.ogg "
-            "-f s16le -ar 22050 -ac 1 - | "
-            "multimon-ng -t raw -a EAS -"
-        )
+        else:
+            cmd = (
+                "ffmpeg -i /home/project/Flash_flood_warning_Tennessee.ogg "
+                "-f s16le -ar 22050 -ac 1 - | "
+                "multimon-ng -t raw -a EAS -"
+            )
         
         
         self.process = subprocess.Popen(

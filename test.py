@@ -4,7 +4,8 @@ from alerts.manager import AlertManager
 manager = AlertManager()
 
 try:
-    manager.start()
+    #start in test mode
+    manager.start(Testing=True)
 
     while True:
         time.sleep(1)

@@ -46,7 +46,7 @@ class AlertManager:
     # ---------------------------
     # START / STOP
     # ---------------------------
-    def start(self):
+    def start(self, Testing: bool = False):
         print("[ALERT MANAGER] Starting system...")
 
         self.running = True
@@ -54,7 +54,7 @@ class AlertManager:
         self.button.on_press(self.acknowledge_button)
 
         self.decoder.on_event(self.handle_decoder_event)
-        self.decoder.start()
+        self.decoder.start(Testing)
 
         #threading.Thread(target=self._run_loop, daemon=True).start()
 
@@ -100,9 +100,9 @@ class AlertManager:
         }
 
     def _make_alert_id(self, parsed):
-        """
-        Creates stable deduplication ID.
-        """
+        
+        #Creates stable deduplication ID.
+        
         return f"{parsed['event']}-{parsed['origin']}-{parsed['locations'][0]}"
 
     # ---------------------------
