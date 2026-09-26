@@ -230,6 +230,6 @@ class AlertManager:
         if self.alert_active:
             self.acknowledge()
         
-        if self.LISTENING:
+        if self.alert_active==False:
             self.speaker.start_stream()
             self.set_state(AlertState.ALERT_ACTIVE)
