@@ -50,6 +50,7 @@ class Speaker:
         #Safe to call multiple times.
         
         if self.stream_process is not None:
+            print("self.stream_process is not None")
             return
 
 
