@@ -217,7 +217,7 @@ class AlertManager:
             self.alert_active = False
 
 
-        self.set_state(AlertState.IDLE)
+        self.set_state(AlertState.LISTENING)
 
         self.speaker.stop()
         self.led.stop()
