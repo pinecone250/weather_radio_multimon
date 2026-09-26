@@ -43,9 +43,9 @@ class AlertManager:
 
         print("[ALERT MANAGER] Initialized")
 
-    # ---------------------------
+     
     # START / STOP
-    # ---------------------------
+     
     def start(self, Testing: bool = False):
         print("[ALERT MANAGER] Starting system...")
 
@@ -69,17 +69,17 @@ class AlertManager:
 
         self.set_state(AlertState.IDLE)
 
-    # ---------------------------
+     
     # STATE MACHINE
-    # ---------------------------
+     
     def set_state(self, new_state):
         if self.state != new_state:
             print(f"[STATE] {self.state.name} → {new_state.name}")
             self.state = new_state
 
-    # ---------------------------
+     
     # SAME PARSING
-    # ---------------------------
+    
     def _parse_same(self, text):
         """
         Extract structured SAME header info.
@@ -105,9 +105,9 @@ class AlertManager:
         
         return f"{parsed['event']}-{parsed['origin']}-{parsed['locations'][0]}"
 
-    # ---------------------------
+     
     # DECODER CALLBACK
-    # ---------------------------
+     
     def handle_decoder_event(self, event):
 
         print("EVENT RECEIVED:", event)
@@ -189,9 +189,9 @@ class AlertManager:
 
 
 
-    # ---------------------------
+     
     # ALERT EXECUTION
-    # ---------------------------
+     
     def trigger_alert(self, parsed):
         with self.lock:
             if self.alert_active:
@@ -207,9 +207,9 @@ class AlertManager:
         self.speaker.start_stream()
         self.led.start_blink()
 
-    # ---------------------------
+     
     # USER ACKNOWLEDGE
-    # ---------------------------
+     
     def acknowledge(self):
         print("[ALERT] Acknowledged")
 
@@ -217,15 +217,19 @@ class AlertManager:
             self.alert_active = False
 
 
-        self.set_state(AlertState.ACKED)
+        self.set_state(AlertState.IDLE)
 
         self.speaker.stop()
         self.led.stop()
 
-    # ---------------------------
+     
     # BUTTON LOOP
-    # ---------------------------
+     
 
     def acknowledge_button(self):
         if self.alert_active:
             self.acknowledge()
+        
+        if self.LISTENING:
+            self.speaker.start_stream()
+            self.set_state(AlertState.ALERT_ACTIVE)
