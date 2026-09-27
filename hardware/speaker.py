@@ -51,6 +51,14 @@ class Speaker:
             self.radio_muted = True
             print("[SPEAKER] Radio audio MUTED")
 
+    def mute_radio(self): 
+        subprocess.run( 
+            ["amixer", "sset", "Speaker", "off"],
+             check=False 
+        ) 
+        self.radio_muted = True
+        print("[SPEAKER] Radio audio MUTED")
+
 
     def unmute_radio(self):
         if self.radio_muted:
