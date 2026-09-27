@@ -83,14 +83,26 @@ class Speaker:
 
         # Raspberry Pi / Linux playback
         try:
+            self.siren_process = subprocess.Popen(
+            [
+                "ffplay",
+                "-nodisp",
+                "-autoexit",
+                "-loglevel", "quiet",
+                file_path
+            ]
+        )
+
+            
             # Preferred lightweight CLI player
-            self.siren_process = subprocess.Popen(["aplay", file_path])
+            #self.siren_process = subprocess.Popen(["aplay", file_path])
             self.siren_process.wait()
             self.siren_process = None
+            
 
         except FileNotFoundError:
-            print("[SPEAKER] aplay not found. Install ALSA utils:")
-            print("sudo apt install alsa-utils")
+            print("[SPEAKER] ffplay not found.")
+            
 
 
     def start_stream(self):
