@@ -201,10 +201,11 @@ class AlertManager:
 
         print(f"[ALERT] ACTIVE → {parsed['event']} {parsed['locations']}")
 
-        self.set_state(AlertState.ALERT_ACTIVE)
+        self.set_state(AlertState.ALERT_ACTIVE)\
+        
+        self.speaker.unmute_radio()
 
         self.speaker.play_siren()
-        self.speaker.start_stream()
         self.led.start_blink()
 
      
@@ -231,7 +232,6 @@ class AlertManager:
         
         if self.alert_active:
             self.acknowledge()
+            return
         
-        if self.alert_active==False:
-            self.speaker.start_stream()
-            self.set_state(AlertState.LISTENING)
+        self.speaker.toggle_radio()

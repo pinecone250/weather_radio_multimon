@@ -13,10 +13,31 @@ class Speaker:
         self.siren_process = None
         self.stream_process = None
         self.frequency = frequency
+        self.radio_muted = False
 
         self.siren_file = "sounds/siren.wav"
 
         print(f"[SPEAKER] Initialized on {self.system}")
+
+
+    def toggle_radio(self):
+        subprocess.run(
+            ["amixer", "sset", "Speaker", "toggle"],
+            check=False
+    )
+
+    self.radio_muted = not self.radio_muted
+
+    print(
+        f"[SPEAKER] Radio audio "
+        f"{'MUTED' if self.radio_muted else 'UNMUTED'}"
+    )
+
+    def unmute_radio(self):
+        if self.radio_muted:
+            self.toggle_radio()
+
+
 
     """
     def play_siren(self):
@@ -46,6 +67,9 @@ class Speaker:
 
 
     def start_stream(self):
+        print("[SPEAKER] Stream is provided by SAMEDecoder")
+        
+        """
         #Starts a new rtl_fm -> aplay pipeline.
         #Safe to call multiple times.
         
@@ -74,12 +98,15 @@ class Speaker:
         )
 
         print("[SPEAKER] Broadcast stream started")
+        """
 
 
     def stop_stream(self):
+        print("[SPEAKER] Stream is managed by SAMEDecoder")
+
         """
         Stops the rtl_fm -> aplay pipeline.
-        """
+        
         if self.stream_process is None:
             return
 
@@ -92,6 +119,7 @@ class Speaker:
         self.stream_process = None
 
         print("[SPEAKER] Broadcast stream stopped")
+        """
 
 
     def stop(self):

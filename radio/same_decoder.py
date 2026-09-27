@@ -14,27 +14,35 @@ class SAMEDecoder:
         self.callback = callback
 
 
-    def start(self, testing: False):
+    def start(self, testing=False):
         
         #Comment out cmd for testing! Remove Later!
+        
+        if self.process is not None:
+            print("[DECODER] Already running")
+            return
 
-        if testing == False:
+        if testing:
             cmd = (
-                f"rtl_fm -f {self.frequency} -M fm -s 24000 -r 24000 -E deemp - "
-                f"| sox -t raw -r 24000 -e signed -b 16 -c 1 - "
-                f"-t raw -r 22050 -e signed -b 16 -c 1 - "
-                f"| multimon-ng -t raw -a EAS -"
+                "ffmpeg -i /home/project/Flash_flood_warning_Tennessee.ogg "
+                "-f s16le -ar 22050 -ac 1 - | "
+                "multimon-ng -t raw -a EAS -"
+                
             )
         
         
         else:
             cmd = (
-                "ffmpeg -i /home/project/Flash_flood_warning_Tennessee.ogg "
-                "-f s16le -ar 22050 -ac 1 - | "
-                "multimon-ng -t raw -a EAS -"
+                f"rtl_fm -f {self.frequency} -M fm -s 24000 -r 24000 -E deemp - "
+                f"| sox -t raw -r 24000 -e signed -b 16 -c 1 - "
+                f"-t raw -r 22050 -e signed -b 16 -c 1 - "
+                f"| multimon-ng -t raw -a EAS -"
+                
             )
         
-        
+        print("[DECODER] Starting radio pipeline:")
+        print(cmd)
+
         self.process = subprocess.Popen(
             ["bash", "-c", cmd],
             stdout=subprocess.PIPE,
