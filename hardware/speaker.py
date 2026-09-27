@@ -24,14 +24,14 @@ class Speaker:
         subprocess.run(
             ["amixer", "sset", "Speaker", "toggle"],
             check=False
-    )
+        )
 
-    self.radio_muted = not self.radio_muted
+        self.radio_muted = not self.radio_muted
 
-    print(
-        f"[SPEAKER] Radio audio "
-        f"{'MUTED' if self.radio_muted else 'UNMUTED'}"
-    )
+        print(
+            f"[SPEAKER] Radio audio "
+            f"{'MUTED' if self.radio_muted else 'UNMUTED'}"
+        )
 
     def unmute_radio(self):
         if self.radio_muted:
