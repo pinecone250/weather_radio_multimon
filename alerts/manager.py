@@ -227,9 +227,11 @@ class AlertManager:
      
 
     def acknowledge_button(self):
+        print("[BUTTON] Button pressed")
+        
         if self.alert_active:
             self.acknowledge()
         
         if self.alert_active==False:
             self.speaker.start_stream()
-            self.set_state(AlertState.ALERT_ACTIVE)
+            self.set_state(AlertState.LISTENING)
