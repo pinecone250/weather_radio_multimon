@@ -14,7 +14,7 @@ class Speaker:
         self.stream_process = None
         self.frequency = frequency
 
-        self.siren_file = "sounds/siren.wav"  # you can switch to mp3 later
+        self.siren_file = "sounds/siren.wav"
 
         print(f"[SPEAKER] Initialized on {self.system}")
 
@@ -64,12 +64,13 @@ class Speaker:
             f"| aplay -D plug:default -r 22050 -f S16_LE"
         )
 
+        print(f"[SPEAKER] Starting: {cmd}")
 
         self.stream_process = subprocess.Popen(
             ["bash", "-c", cmd],
             preexec_fn=os.setsid,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+            #stdout=subprocess.DEVNULL,
+            #stderr=subprocess.DEVNULL,
         )
 
         print("[SPEAKER] Broadcast stream started")
