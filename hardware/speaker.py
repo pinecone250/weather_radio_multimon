@@ -88,7 +88,7 @@ class Speaker:
                 "ffplay",
                 "-nodisp",
                 "-autoexit",
-                "-loglevel", "quiet",
+                #"-loglevel", "quiet",
                 file_path
             ]
         )
