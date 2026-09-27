@@ -26,9 +26,19 @@ class SAMEDecoder:
             cmd = (
                 "ffmpeg -i /home/project/Flash_flood_warning_Tennessee.ogg "
                 "-f s16le -ar 22050 -ac 1 - | "
+                "tee >(aplay -D plug:default -r 22050 -f S16_LE) | "
+                "multimon-ng -t raw -a EAS -"
+            )
+
+
+            """
+            cmd = (
+                "ffmpeg -i /home/project/Flash_flood_warning_Tennessee.ogg "
+                "-f s16le -ar 22050 -ac 1 - | "
                 "multimon-ng -t raw -a EAS -"
                 
             )
+            """
         
         else: cmd = (
         f"rtl_fm -f {self.frequency} "
@@ -40,6 +50,9 @@ class SAMEDecoder:
         f"multimon-ng -t raw -a EAS -"
         )
 
+
+
+
         """
         else:
             cmd = (
@@ -50,7 +63,7 @@ class SAMEDecoder:
                 
             )
         """
-        
+
         print("[DECODER] Starting radio pipeline:")
         print(cmd)
 
