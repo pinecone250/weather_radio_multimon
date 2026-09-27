@@ -19,7 +19,7 @@ class Speaker:
 
         print(f"[SPEAKER] Initialized on {self.system}")
 
-
+    """
     def toggle_radio(self):
         subprocess.run(
             ["amixer", "sset", "Speaker", "toggle"],
@@ -32,6 +32,25 @@ class Speaker:
             f"[SPEAKER] Radio audio "
             f"{'MUTED' if self.radio_muted else 'UNMUTED'}"
         )
+
+    """
+
+    def toggle_radio(self):
+        if self.radio_muted:
+            subprocess.run(
+                ["amixer", "sset", "Speaker", "on"],
+                check=False
+            )
+            self.radio_muted = False
+            print("[SPEAKER] Radio audio UNMUTED")
+        else:
+            subprocess.run(
+                ["amixer", "sset", "Speaker", "off"],
+                check=False
+            )
+            self.radio_muted = True
+            print("[SPEAKER] Radio audio MUTED")
+
 
     def unmute_radio(self):
         if self.radio_muted:

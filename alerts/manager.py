@@ -55,6 +55,7 @@ class AlertManager:
 
         self.decoder.on_event(self.handle_decoder_event)
         self.decoder.start(Testing)
+        self.speaker.mute_radio()
 
         #threading.Thread(target=self._run_loop, daemon=True).start()
 
