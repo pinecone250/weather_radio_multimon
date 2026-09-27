@@ -26,7 +26,7 @@ class SAMEDecoder:
             cmd = (
                 "ffmpeg -i /home/project/Flash_flood_warning_Tennessee.ogg "
                 "-f s16le -ar 22050 -ac 1 - | "
-                "tee >(aplay -D plug:default -r 22050 -f S16_LE) | "
+                "tee >(aplay -D pulse -r 22050 -f S16_LE) | "
                 "multimon-ng -t raw -a EAS -"
             )
 
@@ -41,13 +41,10 @@ class SAMEDecoder:
             """
         
         else: cmd = (
-        f"rtl_fm -f {self.frequency} "
-        f"-M fm "
-        f"-s 22050 "
-        f"-r 22050 "
-        f"-E deemp | "
-        f"tee >(aplay -D plug:default -r 22050 -f S16_LE) | "
-        f"multimon-ng -t raw -a EAS -"
+            f"rtl_fm -f {self.frequency} "
+            f"-M fm -s 22050 -r 22050 -E deemp - | "
+            f"tee >(aplay -D pulse -r 22050 -f S16_LE) | "
+            f"multimon-ng -t raw -a EAS -"
         )
 
 
