@@ -30,7 +30,17 @@ class SAMEDecoder:
                 
             )
         
-        
+        else: cmd = (
+        f"rtl_fm -f {self.frequency} "
+        f"-M fm "
+        f"-s 22050 "
+        f"-r 22050 "
+        f"-E deemp | "
+        f"tee >(aplay -D plug:default -r 22050 -f S16_LE) | "
+        f"multimon-ng -t raw -a EAS -"
+        )
+
+        """
         else:
             cmd = (
                 f"rtl_fm -f {self.frequency} -M fm -s 24000 -r 24000 -E deemp - "
@@ -39,6 +49,7 @@ class SAMEDecoder:
                 f"| multimon-ng -t raw -a EAS -"
                 
             )
+        """
         
         print("[DECODER] Starting radio pipeline:")
         print(cmd)
